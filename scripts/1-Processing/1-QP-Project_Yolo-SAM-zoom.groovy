@@ -1,16 +1,19 @@
+/*
+ * tested and validated on biop-desktop:0.2.3
+ */
+
 
 /*
  * YOLO parameter
  */
 // store your YOLO model in your QuPath project, in a subfolder names "models"
-def MODEL_NAME = "best.pt" // "yolo11n.pt" , "sam2.1_b.pt"
-def DO_YOLO_DETECTION = false
+def MODEL_NAME = "train13.pt" // "yolo11n.pt" , "sam2.1_b.pt"
+def DO_YOLO_DETECTION = true
 
 /*
  * SAM Parameter
  */
 def DO_SAM_SEGMENTATION = true
-def REMOVE_SAM_SEGMENTATION = DO_SAM_SEGMENTATION
 def SAM_DOWNSAMPLE_FACTOR = 1
 def SAM_TYPE = SAMType.VIT_L // VIT_L , SAM2_L
 def SAM_OUTPUT = SAMOutput.MULTI_SMALLEST // MULTI_BEST_QUALITY , MULTI_SMALLEST,MULTI_LARGEST
@@ -18,20 +21,20 @@ def SAM_OUTPUT = SAMOutput.MULTI_SMALLEST // MULTI_BEST_QUALITY , MULTI_SMALLEST
 /*
  * OMERO parameter
  */
-def DO_PUSH_ANNOTATIONS_ON_OMERO = false 
-def DELETE_ROI = false // if you want to delete ROIs on OMERO
-def ROIS_OWNER = "" // use your gaspar, OR to get rois from all owners, you can set the owner to empty string, or use Utils.ALL_USERS
-def SHOW_NOTIF = false
+def DO_PUSH_ANNOTATIONS_ON_OMERO = true
+def DELETE_ROI = true // if you want to delete ROIs on OMERO
+def ROIS_OWNER = "username" // use your gaspar, OR to get rois from all owners, you can set the owner to empty string, or use Utils.ALL_USERS
+def SHOW_NOTIF = true
 
 // Global variables
 def DO_CURRENT_IMAGE = false
 def TEST_MODE = false
 VERBOSE = true
-SLEEP_TIME = 1000 // ms (Because we need the viewer (SAM) we need to add some "wait" here and there )
+SLEEP_TIME = 1000 // ms 
 def EXTENSION = ".ome.tiff"
 
 /*
- * To save png and to sue SAM we need to update the currenr 
+ * To save png and to use SAM we need to update the current server 
  */
 def project = getProject()
 def project_dir =  getProjectBaseDirectory()
@@ -54,15 +57,12 @@ images_list.each{
     def currentHierarchy = getCurrentViewer().getHierarchy()
     if (DO_YOLO_DETECTION) {// make sure to clear objects, otherwise we keep them for SAM
     // Because clearAllObjects() doesn't work anymore
-        currentHierarchy.clearAll() 
+        currentHierarchy.clearAll() // we don't want to clear Yolo objects if we do not run the yolo detection
         Thread.sleep(SLEEP_TIME)     
-    // we don't want to clear Yolo objects if we do not run the yolo detection
-    }else {
-        if (REMOVE_SAM_SEGMENTATION){// but if we still wan to remove some SAM objects
-            sam_annotations = currentHierarchy.getAnnotationObjects().findAll{ it.getPathClass() == getPathClass("SAM-detection")}
-            currentHierarchy.removeObjects( sam_annotations, false ) // we don't want to clear Yolo objects if we do not run the yolo detection
-            Thread.sleep(SLEEP_TIME)  
-        }
+    }else{// but we still wan to remove some SAM objects
+        sam_annotations = currentHierarchy.getAnnotationObjects().findAll{ it.getPathClass() == getPathClass("SAM-detection")}
+        currentHierarchy.removeObjects( sam_annotations, false ) // we don't want to clear Yolo objects if we do not run the yolo detection
+        Thread.sleep(SLEEP_TIME)  
     }
 
     /*
@@ -103,14 +103,25 @@ images_list.each{
         runYolo(arguments)
         if (VERBOSE) println "Yolo detection: done" 
         
-        yolo_boxes = loadYoloBoxes(yolo_ouput_path)   
-        if (yolo_boxes!=null) currentHierarchy.addObjects( yolo_boxes )
+        if (yolo_ouput_path.exists() ) {
+            yolo_boxes = loadYoloBoxes(yolo_ouput_path)     
+        }else {
+           println "Error : no YOLO boxes found in the image : "+ image_name
+           return  
+        } 
         
-        // OMERO part
-        if (DO_PUSH_ANNOTATIONS_ON_OMERO){
-            if (VERBOSE) println "push ROI on OMERO: start" 
-            sendAnnotationsToOMERO( it,  yolo_boxes , DELETE_ROI , ROIS_OWNER , SHOW_NOTIF)
-            if (VERBOSE) println "push ROI on OMERO: done" 
+        if ( yolo_boxes!=null ) {
+            currentHierarchy.addObjects( yolo_boxes )
+        
+            // OMERO part
+            if (DO_PUSH_ANNOTATIONS_ON_OMERO){
+                if (VERBOSE) println "push ROI on OMERO: start" 
+                sendAnnotationsToOMERO( it,  yolo_boxes , DELETE_ROI , ROIS_OWNER , SHOW_NOTIF)
+                if (VERBOSE) println "push ROI on OMERO: done" 
+            }
+        }else {
+           println "Error : no YOLO boxes found in the image : "+ image_name
+           return 
         }
     }
     
@@ -122,12 +133,12 @@ images_list.each{
         if (!DO_YOLO_DETECTION) {
             yolo_boxes = getCurrentViewer().getHierarchy().getAnnotationObjects()
             if (yolo_boxes == null) {
-                println "Error : no YOLO boxes found in the image"
+                println "Error : no YOLO boxes found in the image : "+ image_name
                 return
             }
         }
         
-        if (TEST_MODE) { yolo_boxes = yolo_boxes.subList(0,10) }
+        if (TEST_MODE) { yolo_boxes = yolo_boxes.subList(0,10) } // for test make a sublist
         
         def viewer = getCurrentViewer()
         
