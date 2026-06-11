@@ -1,6 +1,6 @@
-# SCOOP
+# SWIFT
 
-**S**egmentation and **C**lassification of **O**rganoids using **O**bject **P**rediction
+**S**ingle-organoid **W**orkflow for quantitative **I**maging classi**F**ication and **T**racking 
 
 | | |
 |----|----|
