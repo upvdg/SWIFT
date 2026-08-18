@@ -65,7 +65,7 @@ If you cannot use Docker, install the components above manually:
    | [`2-QP-Convert_SAMannotations_into_detections.groovy`](scripts/1-Processing/2-QP-Convert_SAMannotations_into_detections.groovy) | QuPath | Convert SAM annotations to detections, measure, apply classifier |
    | [`1-QP-Export_training_annotation_to_train_YOLO.groovy`](scripts/1-Processing/0-YOLO-finetuning/1-QP-Export_training_annotation_to_train_YOLO.groovy) | QuPath | Export bounding boxes to YOLO label format (fine-tuning) |
    | [`2-YOLO_validation.groovy`](scripts/1-Processing/0-YOLO-finetuning/2-YOLO_validation.groovy) | QuPath | Evaluate YOLO detections against ground truth (IoU 0.5) |
-   | [`SWIFT_tracking.R`](scripts/2-Analysis/SWIFT_tracking.R) | R | Single-organoid tracking across days ([section 5](#5-Optional-addon-Singleorganoid-tracking)) |
+   | [`SWIFT_tracking.R`](scripts/2-Analysis/SWIFT_tracking.R) | R | Single-organoid tracking across days ([section 5](#5-Optional-add-on-Singleorganoid-tracking)) |
 3. Pre-trained YOLO models (`ModelA.pt` etc.) — place them later inside your QuPath project in a subfolder named `models` (explained in [section 3](#3-detection--segmentation-yolo--sam--swift-core)).
 
 4. ## Example QuPath project & pre-trained models (Zenodo)
@@ -127,7 +127,7 @@ Steps:
 |---|---|
 | ![input](resources/0-input.png) | ![EDF](resources/1-EDF.png) |
 
-> 💡 **Naming matters for tracking.** If you plan to use the tracking add-on [section 5](#5-Optional-addon-Singleorganoid-tracking), encode the **timepoint and condition in the image/file name** (e.g. `Timepoint_Condition_Well.ome.tiff`) — the tracking script parses metadata from names.
+> 💡 **Naming matters for tracking.** If you plan to use the tracking add-on [section 5](#5-Optional-add-on-Singleorganoid-tracking), encode the **timepoint and condition in the image/file name** (e.g. `Timepoint_Condition_Well.ome.tiff`) — the tracking script parses metadata from names.
 
 **Next step → [3. Detection & segmentation (YOLO + SAM)](#3-Detection--segmentation-YOLO--SAM--SWIFT-core)**
 
@@ -208,7 +208,7 @@ For each image:
 ## 3.4 Quality control (recommended)
 
 Organoids touching the image edge are cropped and can bias measurements. Two options:
-- Exclude them at the classification step by assigning them to an **Ignore** class ([section 4](#4-Optional-addon-Phenotype-classification)) — this is what the paper does; overlapping organoids whose mask is cropped by a front organoid are handled the same way.
+- Exclude them at the classification step by assigning them to an **Ignore** class ([section 4](#4-Optional-add-on-Phenotype-classification)) — this is what the paper does; overlapping organoids whose mask is cropped by a front organoid are handled the same way.
 - Or delete edge objects manually/by a small script before analysis.
 
 ## 3.5 Expected result
@@ -219,7 +219,7 @@ Organoids touching the image edge are cropped and can bias measurements. Two opt
 
 If you stop here, you already have single-organoid segmentations + morphometrics that you can export (`Measure > Export measurements`) for any downstream analysis.
 
-**Next steps → [4. Classification (optional)](#4-Optional-addon-Phenotype-classification) or [5. Tracking (optional)](#5-Optional-addon-Singleorganoid-tracking)**
+**Next steps → [4. Classification (optional)](#4-Optional-add-on-Phenotype-classification) or [5. Tracking (optional)](#5-Optional-add-on-Singleorganoid-tracking)**
 
 # 4. Optional add-on: Phenotype classification
 
@@ -262,13 +262,13 @@ These morphometric + intensity features are exactly what the classifier learns f
 
 1. In [`2-QP-Convert_SAMannotations_into_detections.groovy`](scripts/1-Processing/2-QP-Convert_SAMannotations_into_detections.groovy), set `classifier_name` to the name you saved in 4.3 (and un-comment `runObjectClassifier` if you commented it in 4.1).
 2. `Run > Run for project` — each image gets converted, measured, and classified in one pass.
-3. Export results: `Measure > Export measurements` → select all images, type **Detections**, separator **semicolon**. This CSV is the input of the tracking module ([section 5](#5-Optional-addon-Singleorganoid-tracking)).
+3. Export results: `Measure > Export measurements` → select all images, type **Detections**, separator **semicolon**. This CSV is the input of the tracking module ([section 5](#5-Optional-add-on-Singleorganoid-tracking)).
 
 ## 4.5 Validate
 
 Compare classifier predictions vs. manual annotations on a held-out set (confusion matrix). In the paper, the intestinal classifier reached **recall > 0.94 and F1 > 0.95** per class. Exclude the `Ignore` class from downstream phenotypic analysis.
 
-**Next step → [5. Optional add-on: Tracking](#5-Optional-addon-Singleorganoid-tracking)**
+**Next step → [5. Optional add-on: Tracking](#5-Optional-add-on-Singleorganoid-tracking)**
 
 # 5. Optional add-on: Single-organoid tracking
 
