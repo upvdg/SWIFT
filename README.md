@@ -58,7 +58,7 @@ If you cannot use Docker, install the components above manually:
 2. Scripts you will use:
    | Script | Software | Purpose |
    |---|---|---|
-   | [`0-Fiji-EDF_local.groovy`](0-Fiji-EDF_local.groovy) | Fiji | EDF projection of the active z-stack (local images) |
+   | [`0-Fiji-EDF_local.groovy`](0-EDF_local.groovy) | Fiji | EDF projection of the active z-stack (local images) |
    | [`0-Fiji-EDF_omero.groovy`](0-Fiji-EDF_omero.groovy) | Fiji | EDF projection in batch from OMERO |
    | [`1-QP-Project_Yolo-SAM-zoom.groovy`](1-QP-Project_Yolo-SAM-zoom.groovy) | QuPath | YOLO detection + SAM segmentation (SWIFT core) |
    | [`2-QP-Convert_SAMannotations_into_detections.groovy`](2-QP-Convert_SAMannotations_into_detections.groovy) | QuPath | Convert SAM annotations to detections, measure, apply classifier |
