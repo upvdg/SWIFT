@@ -59,12 +59,12 @@ If you cannot use Docker, install the components above manually:
    | Script | Software | Purpose |
    |---|---|---|
    | [`0-Fiji-EDF_local.groovy`](scripts/1-Processing/0-EDF-StackProjection/0-Fiji-EDF_local.groovy) | Fiji | EDF projection of the active z-stack (local images) |
-   | [`0-Fiji-EDF_omero.groovy`](0-Fiji-EDF_omero.groovy) | Fiji | EDF projection in batch from OMERO |
-   | [`1-QP-Project_Yolo-SAM-zoom.groovy`](1-QP-Project_Yolo-SAM-zoom.groovy) | QuPath | YOLO detection + SAM segmentation (SWIFT core) |
-   | [`2-QP-Convert_SAMannotations_into_detections.groovy`](2-QP-Convert_SAMannotations_into_detections.groovy) | QuPath | Convert SAM annotations to detections, measure, apply classifier |
-   | [`1-QP-Export_training_annotation_to_train_YOLO.groovy`](1-QP-Export_training_annotation_to_train_YOLO.groovy) | QuPath | Export bounding boxes to YOLO label format (fine-tuning) |
-   | [`2-YOLO_validation.groovy`](2-YOLO_validation.groovy) | QuPath | Evaluate YOLO detections against ground truth (IoU 0.5) |
-   | [`SWIFT_tracking.R`](SWIFT_tracking.R) | R | Single-organoid tracking across days ([section 5](#5-optional-add-on-single-organoid-tracking)) |
+   | [`0-Fiji-EDF_omero.groovy`](scripts/1-Processing/0-EDF-StackProjection/0-Fiji-EDF_omero.groovy) | Fiji | EDF projection in batch from OMERO |
+   | [`1-QP-Project_Yolo-SAM-zoom.groovy`](scripts/1-Processing/1-QP-Project_Yolo-SAM-zoom.groovy) | QuPath | YOLO detection + SAM segmentation (SWIFT core) |
+   | [`2-QP-Convert_SAMannotations_into_detections.groovy`](scripts/1-Processing/2-QP-Convert_SAMannotations_into_detections.groovy) | QuPath | Convert SAM annotations to detections, measure, apply classifier |
+   | [`1-QP-Export_training_annotation_to_train_YOLO.groovy`](scripts/1-Processing/0-YOLO-finetuning/1-QP-Export_training_annotation_to_train_YOLO.groovy) | QuPath | Export bounding boxes to YOLO label format (fine-tuning) |
+   | [`2-YOLO_validation.groovy`](scripts/1-Processing/0-YOLO-finetuning/2-YOLO_validation.groovy) | QuPath | Evaluate YOLO detections against ground truth (IoU 0.5) |
+   | [`SWIFT_tracking.R`](scripts/2-Analysis/SWIFT_tracking.R) | R | Single-organoid tracking across days ([section 5](#5-optional-add-on-single-organoid-tracking)) |
 3. Pre-trained YOLO models (`ModelA.pt` etc.) — place them later inside your QuPath project in a subfolder named `models` (explained in [section 3](#3-detection--segmentation-yolo--sam--swift-core)).
 
 4. ## Example QuPath project & pre-trained models (Zenodo)
@@ -128,7 +128,7 @@ Steps:
 
 > 💡 **Naming matters for tracking.** If you plan to use the tracking add-on ([section 5](#5-optional-add-on-single-organoid-tracking)), encode the **timepoint and condition in the image/file name** (e.g. `Timepoint_Condition_Well.ome.tiff`) — the tracking script parses metadata from names.
 
-**Next step → [3. Detection & segmentation (YOLO + SAM)](#3-detection--segmentation-yolo--sam--swift-core)**
+**Next step → [3. Detection & segmentation (YOLO + SAM)](#-3-Detection--segmentation-YOLO--SAM--SWIFT core)**
 
 # 3. Detection & segmentation (YOLO + SAM) — SWIFT core
 
