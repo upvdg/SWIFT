@@ -6,6 +6,7 @@
 |----|----|
 |![logo](resources/swift.png) | ![timelapse.gif](resources/Overlay_scaled_timed_legended.gif)|
 
+# 1. Installation
 
 SWIFT was tested and validated on **biop-desktop `0.2.3`**, a Docker image that bundles all required software (Fiji, QuPath, YOLO, SAM server) in a reproducible environment. **This is the recommended route, especially for beginners** — no manual installation of Python environments needed.
 
@@ -64,7 +65,7 @@ If you cannot use Docker, install the components above manually:
    | [`2-QP-Convert_SAMannotations_into_detections.groovy`](scripts/1-Processing/2-QP-Convert_SAMannotations_into_detections.groovy) | QuPath | Convert SAM annotations to detections, measure, apply classifier |
    | [`1-QP-Export_training_annotation_to_train_YOLO.groovy`](scripts/1-Processing/0-YOLO-finetuning/1-QP-Export_training_annotation_to_train_YOLO.groovy) | QuPath | Export bounding boxes to YOLO label format (fine-tuning) |
    | [`2-YOLO_validation.groovy`](scripts/1-Processing/0-YOLO-finetuning/2-YOLO_validation.groovy) | QuPath | Evaluate YOLO detections against ground truth (IoU 0.5) |
-   | [`SWIFT_tracking.R`](scripts/2-Analysis/SWIFT_tracking.R) | R | Single-organoid tracking across days ([section 5](#5-optional-add-on-single-organoid-tracking)) |
+   | [`SWIFT_tracking.R`](scripts/2-Analysis/SWIFT_tracking.R) | R | Single-organoid tracking across days ([section 5](#5-Optional-addon-Singleorganoid-tracking)) |
 3. Pre-trained YOLO models (`ModelA.pt` etc.) — place them later inside your QuPath project in a subfolder named `models` (explained in [section 3](#3-detection--segmentation-yolo--sam--swift-core)).
 
 4. ## Example QuPath project & pre-trained models (Zenodo)
@@ -84,7 +85,7 @@ To use it: download and unzip the archive, open the `.qpproj` file in QuPath v0.
 
 SWIFT can read images from and push results (ROIs) to an [OMERO](https://www.openmicroscopy.org/omero/) server. This is **optional** — everything also works with images on a local hard drive. If you don't use OMERO, simply set `DO_PUSH_ANNOTATIONS_ON_OMERO = false` in the QuPath script.
 
-**Next step → [2. Data preparation & EDF projection](#2-data-preparation--edf-projection)**
+**Next step → [2. Data preparation & EDF projection](#2-Data-preparation--EDF-projection)**
 
 # 2. Data preparation & EDF projection
 
@@ -108,8 +109,8 @@ These are the settings used in the paper (Nikon Ti2) — adapt to your microscop
 
 Two variants of the script are provided — pick one:
 
-- [`0-Fiji-EDF_local.groovy`](0-Fiji-EDF_local.groovy) — processes the **z-stack currently open (active) in Fiji**. Open your image first, then run the script for each stack.
-- [`0-Fiji-EDF_omero.groovy`](0-Fiji-EDF_omero.groovy) — **batch mode from OMERO**: give your credentials and the ID of an image, dataset, project, well, plate, or screen; every contained image is fetched, projected, and exported.
+- [`0-Fiji-EDF_local.groovy`](scripts/1-Processing/0-EDF-StackProjection/0-Fiji-EDF_local.groovy) — processes the **z-stack currently open (active) in Fiji**. Open your image first, then run the script for each stack.
+- [`0-Fiji-EDF_omero.groovy`](scripts/1-Processing/0-EDF-StackProjection/0-Fiji-EDF_omero.groovy) — **batch mode from OMERO**: give your credentials and the ID of an image, dataset, project, well, plate, or screen; every contained image is fetched, projected, and exported.
 
 Steps:
 1. **Start Fiji** (inside biop-desktop or your own installation with CLIJ/CLIJ2/CLIJx/PTBIOP update sites active).
@@ -126,9 +127,9 @@ Steps:
 |---|---|
 | ![input](resources/0-input.png) | ![EDF](resources/1-EDF.png) |
 
-> 💡 **Naming matters for tracking.** If you plan to use the tracking add-on ([section 5](#5-optional-add-on-single-organoid-tracking)), encode the **timepoint and condition in the image/file name** (e.g. `Timepoint_Condition_Well.ome.tiff`) — the tracking script parses metadata from names.
+> 💡 **Naming matters for tracking.** If you plan to use the tracking add-on [section 5](#5-Optional-addon-Singleorganoid-tracking), encode the **timepoint and condition in the image/file name** (e.g. `Timepoint_Condition_Well.ome.tiff`) — the tracking script parses metadata from names.
 
-**Next step → [3. Detection & segmentation (YOLO + SAM)](#-3-Detection--segmentation-YOLO--SAM--SWIFT core)**
+**Next step → [3. Detection & segmentation (YOLO + SAM)](#3-Detection--segmentation-YOLO--SAM--SWIFT-core)**
 
 # 3. Detection & segmentation (YOLO + SAM) — SWIFT core
 
@@ -160,11 +161,11 @@ MyQuPathProject/
 | `ModelB.pt` | + mouse small intestine | Highly branched/budding morphologies |
 | `ModelC.pt` | + human rectum | Human rectal organoids |
 
-If none fits your organoids well, fine-tune your own in minutes → [section 6](#6-fine-tuning-yolo-for-your-organoids).
+If none fits your organoids well, fine-tune your own in minutes → [section 6](#6-Finetuning-YOLO-for-your-organoids).
 
 ## 3.2 Configure the script
 
-1. Open [`1-QP-Project_Yolo-SAM-zoom.groovy`](1-QP-Project_Yolo-SAM-zoom.groovy) and **drag & drop it onto the QuPath window** to open the script editor.
+1. Open [`1-QP-Project_Yolo-SAM-zoom.groovy`](scripts/1-Processing/1-QP-Project_Yolo-SAM-zoom.groovy) and **drag & drop it onto the QuPath window** to open the script editor.
 2. Edit the parameters at the top of the script. ⚠️ **The shipped defaults are set for re-running SAM only** — for a full first run you must at least set `MODEL_NAME` and turn detection on:
 
 ```groovy
@@ -207,7 +208,7 @@ For each image:
 ## 3.4 Quality control (recommended)
 
 Organoids touching the image edge are cropped and can bias measurements. Two options:
-- Exclude them at the classification step by assigning them to an **Ignore** class ([section 4](#4-optional-add-on-phenotype-classification)) — this is what the paper does; overlapping organoids whose mask is cropped by a front organoid are handled the same way.
+- Exclude them at the classification step by assigning them to an **Ignore** class ([section 4](#4-Optional-addon-Phenotype-classification)) — this is what the paper does; overlapping organoids whose mask is cropped by a front organoid are handled the same way.
 - Or delete edge objects manually/by a small script before analysis.
 
 ## 3.5 Expected result
@@ -218,7 +219,7 @@ Organoids touching the image edge are cropped and can bias measurements. Two opt
 
 If you stop here, you already have single-organoid segmentations + morphometrics that you can export (`Measure > Export measurements`) for any downstream analysis.
 
-**Next steps → [4. Classification (optional)](#4-optional-add-on-phenotype-classification) or [5. Tracking (optional)](#5-optional-add-on-single-organoid-tracking)**
+**Next steps → [4. Classification (optional)](#4-Optional-addon-Phenotype-classification) or [5. Tracking (optional)](#5-Optional-addon-Singleorganoid-tracking)**
 
 # 4. Optional add-on: Phenotype classification
 
@@ -228,7 +229,7 @@ Example from the paper (mouse intestinal organoids): **Cystic**, **Columnar**, *
 
 ## 4.1 Convert SAM annotations to detections
 
-QuPath object classifiers work on **detections**, while SWIFT masks are **annotations**. The script [`2-QP-Convert_SAMannotations_into_detections.groovy`](2-QP-Convert_SAMannotations_into_detections.groovy) does the conversion. On each image it:
+QuPath object classifiers work on **detections**, while SWIFT masks are **annotations**. The script [`2-QP-Convert_SAMannotations_into_detections.groovy`](scripts/1-Processing/2-QP-Convert_SAMannotations_into_detections.groovy) does the conversion. On each image it:
 
 1. **clears all existing detections** (⚠️ re-running deletes previously classified detections),
 2. duplicates every `SAM-detection` annotation as a **detection** object,
@@ -259,19 +260,19 @@ These morphometric + intensity features are exactly what the classifier learns f
 
 ## 4.4 Apply the classifier to the whole project
 
-1. In [`2-QP-Convert_SAMannotations_into_detections.groovy`](2-QP-Convert_SAMannotations_into_detections.groovy), set `classifier_name` to the name you saved in 4.3 (and un-comment `runObjectClassifier` if you commented it in 4.1).
+1. In [`2-QP-Convert_SAMannotations_into_detections.groovy`](scripts/1-Processing/2-QP-Convert_SAMannotations_into_detections.groovy), set `classifier_name` to the name you saved in 4.3 (and un-comment `runObjectClassifier` if you commented it in 4.1).
 2. `Run > Run for project` — each image gets converted, measured, and classified in one pass.
-3. Export results: `Measure > Export measurements` → select all images, type **Detections**, separator **semicolon**. This CSV is the input of the tracking module ([section 5](#5-optional-add-on-single-organoid-tracking)).
+3. Export results: `Measure > Export measurements` → select all images, type **Detections**, separator **semicolon**. This CSV is the input of the tracking module ([section 5](#5-Optional-addon-Singleorganoid-tracking)).
 
 ## 4.5 Validate
 
 Compare classifier predictions vs. manual annotations on a held-out set (confusion matrix). In the paper, the intestinal classifier reached **recall > 0.94 and F1 > 0.95** per class. Exclude the `Ignore` class from downstream phenotypic analysis.
 
-**Next step → [5. Optional add-on: Tracking](#5-optional-add-on-single-organoid-tracking)**
+**Next step → [5. Optional add-on: Tracking](#5-Optional-addon-Singleorganoid-tracking)**
 
 # 5. Optional add-on: Single-organoid tracking
 
-This module links individual organoids across **consecutive imaging days** using the R script [`SWIFT_tracking.R`](SWIFT_tracking.R) to reconstruct trajectories of growth and phenotype transitions (e.g. cystic → budding). It outputs a ready-to-analyze **Excel workbook** (one sheet per measurement + a summary sheet).
+This module links individual organoids across **consecutive imaging days** using the R script [`SWIFT_tracking.R`](scripts/2-Analysis/SWIFT_tracking.R) to reconstruct trajectories of growth and phenotype transitions (e.g. cystic → budding). It outputs a ready-to-analyze **Excel workbook** (one sheet per measurement + a summary sheet).
 
 ## 5.1 Requirements
 
@@ -340,7 +341,7 @@ One Excel workbook containing:
 - Before trusting bulk statistics, calibrate the distance threshold (plot the `Dist_4_5` column distribution) and visually verify a handful of tracks in QuPath.
 - 📝 Keep the exact script version and threshold used alongside each analysis for reproducibility.
 
-**See also → [6. Fine-tuning YOLO](#6-fine-tuning-yolo-for-your-organoids) · [7. Troubleshooting & FAQ](#7-troubleshooting--faq)**
+**See also → [6. Fine-tuning YOLO](#6-Finetuning-YOLO-for-your-organoids) · [7. Troubleshooting & FAQ](#7-Troubleshooting--FAQ)**
 
 # 6. Fine-tuning YOLO for your organoids
 
@@ -357,7 +358,7 @@ If detection with the provided models is unsatisfactory on your organoid type, f
 
 ## 6.2 Export annotations to YOLO format
 
-1. Open [`1-QP-Export_training_annotation_to_train_YOLO.groovy`](1-QP-Export_training_annotation_to_train_YOLO.groovy) in QuPath. For each annotated image (run it on the current image, or `Run > Run for project`), it writes a YOLO label file `<image name>.txt` (single class `organoid`, normalized coordinates) into a `YOLO_labels/` folder inside the project.
+1. Open [`1-QP-Export_training_annotation_to_train_YOLO.groovy`](scripts/1-Processing/0-YOLO-finetuning/1-QP-Export_training_annotation_to_train_YOLO.groovy) in QuPath. For each annotated image (run it on the current image, or `Run > Run for project`), it writes a YOLO label file `<image name>.txt` (single class `organoid`, normalized coordinates) into a `YOLO_labels/` folder inside the project.
 2. Export the matching **images** (e.g. `File > Export images... > Rendered RGB (PNG)`), then arrange the YOLO folder structure and write a `data.yaml`, e.g.:
    ```yaml
    path: /path/to/dataset
@@ -383,12 +384,12 @@ yolo detect train \
 
 Settings used in the paper: **YOLOv8s**, 70 epochs, input size 1024×1024, RandAugment data augmentation, AdamW optimizer (lr 0.002, momentum 0.9). Training runs even on CPU (Model A was trained on an Apple M1 Pro).
 
-The best weights are saved as `runs/detect/train/weights/best.pt` — rename it (e.g. `MyOrganoids_v1.pt`), copy it to your QuPath project's `models/` folder, and set `MODEL_NAME` accordingly ([section 3](#3-detection--segmentation-yolo--sam--swift-core)).
+The best weights are saved as `runs/detect/train/weights/best.pt` — rename it (e.g. `MyOrganoids_v1.pt`), copy it to your QuPath project's `models/` folder, and set `MODEL_NAME` accordingly ([section 3](#3-Detection--segmentation-YOLO--SAM--SWIFT-core)).
 
 ## 6.4 Evaluate
 
 - Ultralytics prints **precision, recall, mAP50** on the validation set after training. As a reference, Model A reached precision 0.67 / recall 0.83 / mAP50 0.76 on validation and recall 0.92 on an independent dataset.
-- For per-object evaluation against manual ground truth in QuPath, use [`2-YOLO_validation.groovy`](2-YOLO_validation.groovy): assign your ground-truth annotations to a class named **`GT`**, run YOLO detection (class `Yolo_detection`), then run the script — it matches objects at **IoU ≥ 0.5** and prints TP, FP, FN, precision, recall, F1 and an approximate mAP@0.5.
+- For per-object evaluation against manual ground truth in QuPath, use [`2-YOLO_validation.groovy`](scripts/1-Processing/0-YOLO-finetuning/2-YOLO_validation.groovy): assign your ground-truth annotations to a class named **`GT`**, run YOLO detection (class `Yolo_detection`), then run the script — it matches objects at **IoU ≥ 0.5** and prints TP, FP, FN, precision, recall, F1 and an approximate mAP@0.5.
 
 > 📝 **Traceability:** keep `data.yaml`, the training images list, and the exact training command together with each model version.
 
@@ -400,7 +401,7 @@ The best weights are saved as `runs/detect/train/weights/best.pt` — rename it 
 - Check that the model file exists at `YourProject/models/<MODEL_NAME>` and that `MODEL_NAME` matches exactly (case-sensitive).
 - Check that `DO_YOLO_DETECTION = true` — the script's shipped default is `false` (SAM-only mode).
 - Check the QuPath console for the YOLO command output — a Python/conda error means the env path is wrong. Edit `envDirPath` (`/opt/conda/envs/yolo` by default) in the script's `runYolo()` helper.
-- It can also simply mean YOLO detected nothing: try a different model or fine-tune ([section 6](#6-fine-tuning-yolo-for-your-organoids)).
+- It can also simply mean YOLO detected nothing: try a different model or fine-tune ([section 6](#6-Finetuning-YOLO-for-your-organoids)).
 
 **SAM step hangs or fails**
 - Is the SAM server running and reachable at `http://localhost:8000/sam/`? Test the URL in a browser.
@@ -416,11 +417,11 @@ The best weights are saved as `runs/detect/train/weights/best.pt` — rename it 
 ## Detection & segmentation quality
 
 **Many organoids missed, or boxes on debris**
-- Fine-tune with a few annotations of your organoid type — this is fast and usually solves it ([section 6](#6-fine-tuning-yolo-for-your-organoids)).
-- Check your EDF projection quality first (blurry input → poor detection). Try adjusting σ ([section 2](#2-data-preparation--edf-projection)).
+- Fine-tune with a few annotations of your organoid type — this is fast and usually solves it ([section 6](#6-Finetuning-YOLO-for-your-organoids)).
+- Check your EDF projection quality first (blurry input → poor detection). Try adjusting σ ([section 2](#2-Data-preparation--EDF-projection)).
 
 **Overlapping organoids: one mask is cropped**
-- Expected behavior: SAM segments the front organoid fully; the one behind gets a cropped mask. Assign cropped objects to the **Ignore** class in the classifier so they're excluded ([section 4](#4-optional-add-on-phenotype-classification)) — or keep them, depending on your analysis.
+- Expected behavior: SAM segments the front organoid fully; the one behind gets a cropped mask. Assign cropped objects to the **Ignore** class in the classifier so they're excluded ([section 4](#4-Optional-addon-Phenotype-classification)) — or keep them, depending on your analysis.
 
 **Segmentation looks coarse or grabs the wrong object**
 - Make sure `SAM_DOWNSAMPLE_FACTOR = 1` (native resolution).
@@ -435,7 +436,7 @@ The best weights are saved as `runs/detect/train/weights/best.pt` — rename it 
 - Add more training examples specifically of the confused morphologies, ideally from the images where errors occur, and retrain. Check that intensity features were computed (the convert script must have run).
 
 **Tracks jump between different organoids**
-- Your day-to-day displacement exceeds the 150 µm gate, or plate repositioning is too variable. Measure typical displacements in your data and adjust `MAX_DISTANCE_UM` ([section 5](#5-optional-add-on-single-organoid-tracking)).
+- Your day-to-day displacement exceeds the 150 µm gate, or plate repositioning is too variable. Measure typical displacements in your data and adjust `MAX_DISTANCE_UM` ([section 5](#5-Optional-addon-Singleorganoid-tracking)).
 
 ## General
 
