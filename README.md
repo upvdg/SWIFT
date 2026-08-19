@@ -161,7 +161,7 @@ MyQuPathProject/
 | `ModelB.pt` | + mouse small intestine | Highly branched/budding morphologies |
 | `ModelC.pt` | + human rectum | Human rectal organoids |
 
-If none fits your organoids well, fine-tune your own in minutes → [section 6](#6-Finetuning-YOLO-for-your-organoids).
+If none fits your organoids well, fine-tune your own in minutes → [section 6](#6-fine-tuning-yolo-for-your-organoids).
 
 ## 3.2 Configure the script
 
